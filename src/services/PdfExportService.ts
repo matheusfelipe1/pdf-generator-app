@@ -8,11 +8,16 @@ import { DocumentParserService } from './DocumentParserService';
  * Exports the current HTML content to a PDF file inside the app documents directory.
  */
 export class PdfExportService {
+  private static readonly A4_WIDTH_POINTS = 595;
+  private static readonly A4_HEIGHT_POINTS = 842;
+
   public static async export(content: string, contentType: ContentType): Promise<PdfExportResult> {
     const documentHtml = DocumentParserService.buildPreviewDocument(content, contentType);
 
     const printResult = await Print.printToFileAsync({
       html: documentHtml,
+      width: this.A4_WIDTH_POINTS,
+      height: this.A4_HEIGHT_POINTS,
       margins: {
         top: 18,
         bottom: 18,

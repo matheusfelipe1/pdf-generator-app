@@ -73,12 +73,27 @@ export default function PdfGeneratorScreen() {
 
       const result = await PdfGeneratorViewModel.savePdf(content, contentType);
       setSavedPath(result.uri);
-      setStatus(`PDF saved to Documents: ${result.fileName}`);
+      setStatus(`PDF saved to Documents: ${result.fileName}. Tap the link below to open it.`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'The PDF could not be created.';
       setStatus(message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleOpenSavedPdf = async () => {
+    if (!savedPath) {
+      return;
+    }
+
+    try {
+      setStatus('Opening saved PDF...');
+      await PdfGeneratorViewModel.openSavedPdf(savedPath);
+      setStatus('Saved PDF opened successfully.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to open the saved PDF.';
+      setStatus(message);
     }
   };
 
@@ -156,7 +171,16 @@ export default function PdfGeneratorScreen() {
           <View style={styles.statusBox}>
             <Text style={styles.statusLabel}>Status</Text>
             <Text style={styles.statusText}>{status}</Text>
-            {savedPath ? <Text style={styles.savedPath}>Saved at: {savedPath}</Text> : null}
+            {savedPath ? (
+              <View style={styles.savedFileArea}>
+                <Pressable onPress={handleOpenSavedPdf} style={styles.savedFileButton}>
+                  <Text style={styles.savedFileButtonText}>Open saved PDF</Text>
+                </Pressable>
+                <Pressable onPress={handleOpenSavedPdf}>
+                  <Text style={styles.savedPath}>Saved at: {savedPath}</Text>
+                </Pressable>
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -317,11 +341,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  savedFileArea: {
+    marginTop: 10,
+    gap: 8,
+  },
+  savedFileButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#0f3a57',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#1c5f8c',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  savedFileButtonText: {
+    color: '#9be7ff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
   savedPath: {
-    marginTop: 8,
     color: '#7ef0c0',
     fontSize: 12,
     lineHeight: 18,
+    textDecorationLine: 'underline',
   },
   previewCard: {
     backgroundColor: '#f8fafc',

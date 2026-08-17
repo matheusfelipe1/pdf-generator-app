@@ -1,5 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { Linking } from 'react-native';
 
 import { ContentType, DocumentModel, PdfExportResult, SourceType } from '../models/DocumentModel';
 import { DocumentParserService } from '../services/DocumentParserService';
@@ -53,6 +55,27 @@ export class PdfGeneratorViewModel {
 
   public static async savePdf(content: string, contentType: ContentType): Promise<PdfExportResult> {
     return PdfExportService.export(content, contentType);
+  }
+
+  public static async openSavedPdf(uri: string): Promise<void> {
+    const canOpenDirectly = await Linking.canOpenURL(uri);
+
+    if (canOpenDirectly) {
+      await Linking.openURL(uri);
+      return;
+    }
+
+    const canShare = await Sharing.isAvailableAsync();
+
+    if (!canShare) {
+      throw new Error('Unable to open the saved PDF on this device.');
+    }
+
+    await Sharing.shareAsync(uri, {
+      UTI: '.pdf',
+      mimeType: 'application/pdf',
+      dialogTitle: 'Open saved PDF',
+    });
   }
 
   public static getSourceTypeOptions(): Array<{ label: string; value: SourceType }> {

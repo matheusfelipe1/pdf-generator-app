@@ -9,6 +9,13 @@ import { ContentType } from '../models/DocumentModel';
  * and PDF export always use the same formatting rules.
  */
 export class DocumentParserService {
+  private static readonly A4_PAGE_CSS = `
+    @page {
+      size: A4;
+      margin: 14mm;
+    }
+  `;
+
   /**
    * Returns the supported content categories displayed in the UI.
    */
@@ -77,6 +84,8 @@ export class DocumentParserService {
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <style>
+            ${this.A4_PAGE_CSS}
+
             body {
               margin: 0;
               padding: 24px;
@@ -85,6 +94,14 @@ export class DocumentParserService {
               font-family: 'SF Pro Display', 'Segoe UI', sans-serif;
             }
             * { box-sizing: border-box; }
+            .page {
+              width: 210mm;
+              min-height: 297mm;
+              margin: 0 auto;
+              padding: 14mm;
+              background: #ffffff;
+              box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+            }
             h1, h2, h3, h4 { color: #0f172a; margin-bottom: 12px; }
             p, li { line-height: 1.7; }
             pre {
@@ -115,10 +132,24 @@ export class DocumentParserService {
               background: #eff6ff;
             }
             a { color: #2563eb; }
+
+            @media print {
+              body {
+                padding: 0;
+                background: #ffffff;
+              }
+              .page {
+                width: auto;
+                min-height: auto;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+              }
+            }
           </style>
         </head>
         <body>
-          ${bodyContent}
+          <main class="page">${bodyContent}</main>
         </body>
       </html>`;
   }
