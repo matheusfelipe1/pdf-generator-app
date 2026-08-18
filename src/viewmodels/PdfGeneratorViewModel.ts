@@ -58,11 +58,11 @@ export class PdfGeneratorViewModel {
   }
 
   public static async openSavedPdf(uri: string): Promise<void> {
-    const canOpenDirectly = await Linking.canOpenURL(uri);
-
-    if (canOpenDirectly) {
+    try {
       await Linking.openURL(uri);
       return;
+    } catch {
+      // Fall back to sharing when direct opening is not available.
     }
 
     const canShare = await Sharing.isAvailableAsync();
